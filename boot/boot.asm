@@ -11,9 +11,7 @@ extern kernel_main
 extern gdt_flush
 extern idt_flush
 
-; =========================
-; GDT Flush
-; =========================
+
 gdt_flush:
   mov eax, [esp+4]
   lgdt [eax]
@@ -30,17 +28,13 @@ gdt_flush:
 .flush:
   ret
 
-; =========================
-; IDT Flush
-; =========================
+
 idt_flush:
   mov eax, [esp+4]
   lidt [eax]
   ret
 
-; =========================
-; ISR Macros
-; =========================
+
 %macro ISR_NOERRCODE 1
 global isr%1
 isr%1:
@@ -49,9 +43,7 @@ isr%1:
   jmp isr_common
 %endmacro
 
-; =========================
-; IRQ Macros
-; =========================
+
 %macro IRQ 1
 global irq%1
 irq%1:
@@ -60,22 +52,16 @@ irq%1:
   jmp irq_common
 %endmacro
 
-; =========================
-; CPU Exceptions
-; =========================
+
 ISR_NOERRCODE 0
 ISR_NOERRCODE 1
 ISR_NOERRCODE 14
 
-; =========================
-; Hardware IRQs
-; =========================
+
 IRQ 0
 IRQ 1
 
-; =========================
-; ISR Common Handler
-; =========================
+
 extern isr_handler
 
 isr_common:
@@ -96,9 +82,7 @@ isr_common:
   sti
   iretd
 
-; =========================
-; IRQ Common Handler
-; =========================
+
 extern irq_handler
 
 irq_common:
@@ -119,9 +103,7 @@ irq_common:
   sti
   iretd
 
-; =========================
-; Kernel Entry
-; =========================
+
 _start:
   mov esp, stack_top
   call kernel_main
@@ -131,9 +113,7 @@ _start:
   hlt
   jmp .hang
 
-; =========================
-; Stack
-; =========================
+
 section .bss
 align 16
 
