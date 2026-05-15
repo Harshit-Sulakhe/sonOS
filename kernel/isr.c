@@ -34,10 +34,10 @@ void irq_handler(uint32_t num) {
     if (num == 0) {
         scheduler_tick();
     }
+
     if (num == 1) {
         uint8_t scancode = inb(0x60);
 
-        /* Only handle key press (not release) */
         if (!(scancode & 0x80)) {
             if (scancode < sizeof(keymap)) {
                 char c = keymap[scancode];
@@ -45,6 +45,7 @@ void irq_handler(uint32_t num) {
             }
         }
     }
+
     if (num >= 8) outb(0xA0, 0x20);
     outb(0x20, 0x20);
 }
