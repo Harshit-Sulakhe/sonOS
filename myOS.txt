@@ -1,0 +1,21 @@
+QEMU powers on
+    ↓
+BIOS runs (emulated by QEMU)
+    ↓
+GRUB bootloader loads from ISO
+    ↓
+GRUB reads grub.cfg → finds myos.bin
+    ↓
+GRUB loads myos.bin into memory at 0x100000
+    ↓
+GRUB switches CPU to 32-bit protected mode
+    ↓
+GRUB jumps to _start in boot.asm
+    ↓
+boot.asm sets up the stack
+    ↓
+boot.asm calls kernel_main() in C
+    ↓
+kernel_main() writes "Hello from MyOS!" to 0xB8000
+    ↓
+Text appears on screen
