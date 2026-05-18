@@ -10,6 +10,7 @@
 #include "initrd.h"
 #include "syscall.h"
 #include "shell.h"
+#include "ata.h"
 
 static char *vga = (char*)0xB8000;
 static int col = 0, row = 0;
@@ -53,10 +54,46 @@ void kernel_main() {
     kheap_init();
     print("[OK] Heap\n", 0x0A);
 
+    /* ATA disk driver */
+if (ata_init() == 0) {
+    print("[OK] ATA disk found\n", 0x0A);
+
+    /* Test: write a message to sector 100 */
+    uint8_t wbuf[512];
+    for (int i = 0; i < 512; i++) wbuf[i] = 0;
+    const char *msg = "Hello from MyOS disk!";
+    for (int i = 0; msg[i]; i++) wbuf[i] = msg[i];
+
+    if (ata_write(100, wbuf, 1) == 0) {
+        print("[OK] ATA write sector 100\n", 0x0A);
+    }
+
+    /* Test: read it back */
+    uint8_t rbuf[512];
+    if (ata_read(100, rbuf, 1) == 0) {
+        print("[OK] ATA read sector 100: ", 0x0A);
+        /* Print first 21 chars of what we read */
+        for (int i = 0; i < 21; i++) {
+            if (rbuf[i]) {
+                int off = (row * 80 + col) * 2;
+                vga[off]   = rbuf[i];
+                vga[off+1] = 0x0E;
+                col++;
+            }
+        }
+        print("\n", 0x0F);
+    }
+} else {
+    print("[--] No ATA disk (add -hda to QEMU)\n", 0x0E);
+}
+
     /* Phase 7 */
-    process_init();
+   /* process_init();
     scheduler_init();
     print("[OK] Scheduler\n", 0x0A);
+    process_create("Task-A", task_a);
+    process_create("Task-B", task_b);
+    print("[OK] Processes created\n", 0x0A); */
 
     /* Phase 8: VFS + initrd */
     vfs_init();
@@ -84,17 +121,36 @@ void kernel_main() {
     print("[OK] VFS + initrd\n", 0x0A);
 
     /* Syscall interface */
-    syscall_init();
+   syscall_init();
     print("[OK] Syscalls\n", 0x0A);
 
-    /* Enable interrupts */
     asm volatile("sti");
     print("[OK] Interrupts\n", 0x0A);
 
-    /* Launch shell */
-    print("[OK] Launching shell...\n", 0x0A);
-    shell_init();
+    print("[OK] Step 1\n", 0x0A);
+    
+    /* Draw divider manually instead of calling shell_init */
+    for (int i = 0; i < 80; i++) {
+        vga[(17 * 80 + i) * 2]     = '-';
+        vga[(17 * 80 + i) * 2 + 1] = 0x08;
+    }
+    print("[OK] Step 2\n", 0x0A);
 
-    /* Idle loop — everything runs via interrupts */
+    /* Test shell directly */
+    vga[(18 * 80 + 0) * 2]     = 'm';
+    vga[(18 * 80 + 0) * 2 + 1] = 0x0F;
+    vga[(18 * 80 + 1) * 2]     = 'y';
+    vga[(18 * 80 + 1) * 2 + 1] = 0x0F;
+    vga[(18 * 80 + 2) * 2]     = 'o';
+    vga[(18 * 80 + 2) * 2 + 1] = 0x0F;
+    vga[(18 * 80 + 3) * 2]     = 's';
+    vga[(18 * 80 + 3) * 2 + 1] = 0x0F;
+    vga[(18 * 80 + 4) * 2]     = '>';
+    vga[(18 * 80 + 4) * 2 + 1] = 0x0E;
+    print("[OK] Step 3\n", 0x0A);
+
+    shell_init();
+    print("[OK] Shell init done\n", 0x0A);
+
     while(1) asm volatile("hlt");
 }

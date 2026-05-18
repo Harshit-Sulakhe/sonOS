@@ -4,7 +4,7 @@
 
 static char *vga = (char*)0xB8000;
 static int syscall_col = 0;
-static int syscall_row = 14;
+static int syscall_row = 18;
 
 static void vga_putchar(char c, uint8_t color) {
     if (c == '\n') {
@@ -42,7 +42,7 @@ static void vga_putchar(char c, uint8_t color) {
 
 void syscall_init() {
     syscall_col = 0;
-    syscall_row = 14;
+    syscall_row = 18;
 }
 
 uint32_t syscall_handler(uint32_t num,

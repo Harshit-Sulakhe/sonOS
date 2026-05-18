@@ -153,7 +153,7 @@ static void execute(const char *cmd) {
 }
 
 void shell_init() {
-    sh_row = 14;
+    sh_row = 18;
     sh_col = 0;
     input_len = 0;
 

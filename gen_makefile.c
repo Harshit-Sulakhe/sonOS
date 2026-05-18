@@ -2,7 +2,7 @@
 
 int main() {
     FILE *f = fopen("Makefile", "w");
-    if (!f) { printf("Failed to open Makefile!\n"); return 1; }
+    if (!f) { printf("Failed!\n"); return 1; }
 
     fprintf(f, "CC = i686-elf-gcc\n");
     fprintf(f, "AS = nasm\n");
@@ -52,7 +52,10 @@ int main() {
     fprintf(f, "shell.o: kernel/shell.c\n");
     fprintf(f, "\t$(CC) $(CFLAGS) -c $< -o $@\n");
     fprintf(f, "\n");
-    fprintf(f, "myos.bin: boot.o kernel.o gdt.o idt.o isr.o pmm.o paging.o kheap.o process.o scheduler.o vfs.o initrd.o syscall.o shell.o\n");
+    fprintf(f, "ata.o: kernel/ata.c\n");
+    fprintf(f, "\t$(CC) $(CFLAGS) -c $< -o $@\n");
+    fprintf(f, "\n");
+    fprintf(f, "myos.bin: boot.o kernel.o gdt.o idt.o isr.o pmm.o paging.o kheap.o process.o scheduler.o vfs.o initrd.o syscall.o shell.o ata.o\n");
     fprintf(f, "\t$(CC) -T linker.ld -ffreestanding -nostdlib -o $@ $^\n");
     fprintf(f, "\n");
     fprintf(f, "myos.iso: myos.bin\n");
@@ -61,7 +64,7 @@ int main() {
     fprintf(f, "\tgrub-mkrescue -o myos.iso iso\n");
     fprintf(f, "\n");
     fprintf(f, "run: myos.iso\n");
-    fprintf(f, "\tqemu-system-i386 -cdrom myos.iso -k en-us\n");
+    fprintf(f, "\tqemu-system-i386 -cdrom myos.iso -drive file=disk.img,format=raw,index=0,media=disk -k en-us -boot d\n");
     fprintf(f, "\n");
     fprintf(f, "clean:\n");
     fprintf(f, "\trm -f *.o *.bin *.iso\n");

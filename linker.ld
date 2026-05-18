@@ -1,8 +1,18 @@
 ENTRY(_start)
 SECTIONS {
   . = 0x100000;
-  .text   : { *(.multiboot) *(.text)   }
-  .data   : { *(.data)                 }
-  .bss    : { *(.bss)                  }
+  .multiboot ALIGN(4) : {
+    *(.multiboot)
+  }
+  .text ALIGN(4) : {
+    *(.text)
+  }
+  .data ALIGN(4) : {
+    *(.data)
+  }
+  .bss ALIGN(4) : {
+    *(COMMON)
+    *(.bss)
+  }
   kernel_end = .;
 }
