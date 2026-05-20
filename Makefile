@@ -58,7 +58,7 @@ myos.iso: myos.bin
 	grub-mkrescue -o myos.iso iso
 
 run: myos.iso
-	qemu-system-i386 -cdrom myos.iso -drive file=disk.img,format=raw,index=0,media=disk -k en-us -boot d
+	qemu-system-i386 -cdrom myos.iso -drive file=disk.img,format=raw -k en-us -no-reboot -no-shutdown
 
 clean:
 	rm -f *.o *.bin *.iso

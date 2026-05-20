@@ -15,18 +15,26 @@ typedef enum {
     PROCESS_DEAD    = 4   /* finished, to be cleaned up*/
 } process_state_t;
 
-/* Saved CPU register state — must match pusha order */
 typedef struct {
     uint32_t edi, esi, ebp, esp;
     uint32_t ebx, edx, ecx, eax;
     uint32_t eip, eflags;
 } registers_t;
 
+/* Saved CPU register state — must match pusha order */
+typedef struct {
+    uint32_t edi, esi, ebp, esp;
+    uint32_t ebx, edx, ecx, eax;
+
+    uint32_t int_no;
+    uint32_t err_code;
+} interrupt_frame_t;
+
 /* The process control block (PCB) */
 typedef struct process {
     uint32_t        pid;          /* process ID              */
     process_state_t state;        /* current state           */
-    registers_t     regs;         /* saved register state    */
+    registers_t  regs;         /* saved register state    */
     uint32_t        esp;          /* saved stack pointer     */
     uint8_t        *stack;        /* pointer to stack memory */
     uint32_t        sleep_ticks;  /* ticks remaining to sleep*/

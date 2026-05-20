@@ -2,7 +2,7 @@
 #define ISR_H
 
 #include <stdint.h>
-
+#include "process.h"
 
 extern void isr0();
 extern void isr1();
@@ -13,7 +13,9 @@ extern void irq0();
 extern void irq1();
 
 
-void isr_handler(uint32_t num);
-void irq_handler(uint32_t num);
+
+
+void isr_handler(interrupt_frame_t *r);
+void irq_handler(interrupt_frame_t *r);
 
 #endif

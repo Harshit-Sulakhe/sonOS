@@ -3,6 +3,8 @@
 #include "scheduler.h"
 #include "shell.h"
 
+
+
 static char *vga = (char*)0xB8000;
 static int cursor = 160;
 
@@ -25,25 +27,31 @@ static const char keymap[] = {
    0,  ' '
 };
 
-void isr_handler(uint32_t num) {
-    if (num == 0)  print("Exception: Divide by zero! ");
-    if (num == 14) print("Exception: Page fault!     ");
+void isr_handler(interrupt_frame_t *r) {
+    if (r->int_no == 0)  print("Exception: Divide by zero! ");
+    if (r->int_no == 14) print("Exception: Page fault!     ");
 }
 
-void irq_handler(uint32_t num) {
-    if (num == 0) {
-        /* Temporarily disabled */
-        /* scheduler_tick(); */
-    }
-    if (num == 1) {
-        uint8_t scancode = inb(0x60);
-        if (!(scancode & 0x80)) {
-            if (scancode < sizeof(keymap)) {
-                char c = keymap[scancode];
-                if (c) shell_handle_key(c);
-            }
+void irq_handler(interrupt_frame_t *r) {
+
+   if (r->int_no == 33) {
+
+    uint8_t scancode = inb(0x60);
+
+    if (!(scancode & 0x80)) {
+
+        if (scancode < sizeof(keymap)) {
+
+            char c = keymap[scancode];
+
+            if (c)
+                shell_handle_key(c);
         }
     }
-    if (num >= 8) outb(0xA0, 0x20);
+}
+
+    if (r->int_no >= 40)
+        outb(0xA0, 0x20);
+
     outb(0x20, 0x20);
 }

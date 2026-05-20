@@ -35,73 +35,67 @@ idt_flush:
   ret
 
 
+
 %macro ISR_NOERRCODE 1
 global isr%1
 isr%1:
-  cli
-  push dword %1
-  jmp isr_common
+    push dword 0
+    push dword %1
+    jmp isr_common
 %endmacro
 
-
-%macro IRQ 1
+%macro IRQ 2
 global irq%1
 irq%1:
-  cli
-  push dword %1
-  jmp irq_common
+    push dword 0
+    push dword %2
+    jmp irq_common
 %endmacro
 
-
+; CPU Exceptions
 ISR_NOERRCODE 0
 ISR_NOERRCODE 1
 ISR_NOERRCODE 14
 
+; Hardware IRQs
+IRQ 0, 32
+IRQ 1, 33
 
-IRQ 0
-IRQ 1
 
 
 extern isr_handler
 
 isr_common:
-  pusha
+    pusha
 
-  ; Get interrupt number
-  mov eax, [esp + 32]
-  push eax
+    mov eax, esp
+    push eax
 
-  call isr_handler
+    call isr_handler
 
-  add esp, 4
-  popa
+    add esp, 4
+    popa
 
-  ; Remove original interrupt number
-  add esp, 4
+    add esp, 8
+    iret
 
-  sti
-  iretd
 
 
 extern irq_handler
 
 irq_common:
-  pusha
+    pusha
 
-  ; Get IRQ number
-  mov eax, [esp + 32]
-  push eax
+    mov eax, esp
+    push eax
 
-  call irq_handler
+    call irq_handler
 
-  add esp, 4
-  popa
+    add esp, 4
+    popa
 
-  ; Remove original IRQ number
-  add esp, 4
-
-  sti
-  iretd
+    add esp, 8
+    iret
 
 
 _start:
